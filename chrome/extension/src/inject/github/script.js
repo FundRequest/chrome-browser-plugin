@@ -458,12 +458,9 @@
     }];
 
     let zeroAddress = '0x0000000000000000000000000000000000000000';
-    let tokenContractAddress = '0xfd1de38dc456112c55c3e6bc6134b2f545b91386';
-    let fundRequestContractAddress = '0x797b33d3bb0c74a7860cd2ca80bf063809dced80';
     let tokenContract;
     let fundRequestContract;
     let _web3;
-    let providerApi = 'https://ropsten.fundrequest.io';
     let loaderHtml = '<i class="fnd-loader fnd-loader--small"></i>';
 
     let contractInitialized = false;
@@ -502,9 +499,9 @@
     function initContracts() {
         if (!contractInitialized) {
             contractInitialized = true;
-            _web3 = new Web3(new Web3.providers.HttpProvider(providerApi));
-            tokenContract = _web3.eth.contract(tokenAbi).at(tokenContractAddress);
-            fundRequestContract = _web3.eth.contract(fundRequestAbi).at(fundRequestContractAddress);
+            _web3 = new Web3(new Web3.providers.HttpProvider(pluginSettings.providerApi));
+            tokenContract = _web3.eth.contract(tokenAbi).at(pluginSettings.tokenContractAddress);
+            fundRequestContract = _web3.eth.contract(fundRequestAbi).at(pluginSettings.fundRequestContractAddress);
         }
     }
 
@@ -646,9 +643,11 @@
             updateIssueStats(issueId);
 
             button.addEventListener("click", function() {
+                let url = 'https://github.com' + document.querySelector('#partial-discussion-header').dataset.url;
+                url = url.split('/show_partial')[0];
                 chrome.extension.sendMessage({
                     action: 'fund',
-                    url: document.head.querySelector('[property="og:url"]').content
+                    url: url
                 }, function(response) {
                     if (response.done) {
                         if (response.success) {

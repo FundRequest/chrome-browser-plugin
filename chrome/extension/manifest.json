@@ -28,9 +28,8 @@
     "contentSettings",
     "management",
     "https://github.com/FundRequest/*",
-    "https://alpha.fundrequest.io/*",
-    "http://localhost:4200/*",
-    "https://ropsten.fundrequest.io/"
+    "https://*.fundrequest.io/*",
+    "http://localhost:4200/*"
   ],
   "content_scripts": [
     {
@@ -49,7 +48,7 @@
     },
     {
       "matches": [
-        "https://alpha.fundrequest.io/*",
+        "https://*.fundrequest.io/*",
         "http://localhost:4200/*"
       ],
       "js": [

@@ -1,11 +1,14 @@
 (function() {
     'use strict';
 
-    let store = new Store("settings");
+    let store = new Store('settings');
     let settings = {
         accountAddress: store.get('fndAccountAddress'),
-        fundUrlPrefix: store.get('fndFundUrlPrefix') || "https://alpha.fundrequest.io/#/requests/fund?url=",
-        optionsUrl: ""
+        tokenContractAddress: store.get('fndTokenContractAddress') || '0xfd1de38dc456112c55c3e6bc6134b2f545b91386',
+        fundRequestContractAddress: store.get('fndFundRequestContractAddress') || '0x797b33d3bb0c74a7860cd2ca80bf063809dced80',
+        providerApi: store.get('fndProviderApi') || 'https://ropsten.fundrequest.io',
+        fundUrlPrefix: store.get('fndFundUrlPrefix') || 'https://alpha.fundrequest.io/#/requests/fund?url=',
+        optionsUrl: ''
     };
 
     function generateUUID() { // Public Domain/MIT
@@ -22,7 +25,7 @@
 
     chrome.management.getAll(function (extensionInfoList){
         for(let i=0; i < extensionInfoList.length && settings.optionsUrl.length <= 0; i++) {
-            if(extensionInfoList[i].name === "FundRequest") {
+            if(extensionInfoList[i].name === 'FundRequest') {
                 settings.optionsUrl = `chrome-extension://${extensionInfoList[i].id}/src/options_custom/index.html`;
             }
         }
@@ -54,7 +57,7 @@
                      */
 
                     chrome.tabs.create({url: settings.fundUrlPrefix + encodeURI(request.url)}, function(tab) {
-                        chrome.tabs.executeScript(tab.id, {file: "src/inject/fnd/script.js"}, function() {
+                        chrome.tabs.executeScript(tab.id, {file: 'src/inject/fnd/script.js'}, function() {
                             chrome.tabs.sendMessage(tab.id, {id: id}, function(response) {
                                 response = typeof response !== 'undefined' ? response : {};
                                 if (response.id === id) {
@@ -65,7 +68,7 @@
                                         response.done = true;
                                     }
                                     chrome.tabs.remove([tab.id]);
-                                    chrome.tabs.update(currentTabId, {"active": true, "highlighted": true});
+                                    chrome.tabs.update(currentTabId, {'active': true, 'highlighted': true});
 
                                     sendResponse(response);
                                 }
