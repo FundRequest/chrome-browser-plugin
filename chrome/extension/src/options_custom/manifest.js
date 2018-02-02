@@ -32,15 +32,15 @@ this.manifest = {
             "name": "fndTokenContractAddress",
             "type": "text",
             "label": "Ethereum address token contract",
-            "text": "0xfd1de38dc456112c55c3e6bc6134b2f545b91386"
+            "text": "0x5a481b10a0138e0db94126e9b6ca2188a18cb21c"
         },
         {
             "tab": i18n.get("developer"),
             "group": i18n.get("settings"),
             "name": "fndFundRequestContractAddress",
             "type": "text",
-            "label": "Ethereum address RundRequest contract",
-            "text": "0x797b33d3bb0c74a7860cd2ca80bf063809dced80"
+            "label": "Ethereum address FundRequest contract",
+            "text": "0x0a0d468e58a8ddb2817635fe4bef039046de8a14"
         },
         {
             "tab": i18n.get("developer"),
