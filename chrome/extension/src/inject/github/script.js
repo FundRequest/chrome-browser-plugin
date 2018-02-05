@@ -653,7 +653,7 @@
     function init() {
         initContracts();
         let interval = setInterval(function() {
-            if(contractsInitialized()) {
+            if (contractsInitialized()) {
                 window.clearInterval(interval);
                 initIssueDetail();
                 initIssueOverview();
@@ -703,7 +703,7 @@
         if (!contractsInitialized()) {
             _web3 = new Web3(new Web3.providers.HttpProvider(pluginSettings.providerApi));
             //tokenContract = _web3.eth.contract(tokenAbi).at(pluginSettings.tokenContractAddress);
-            //fundRequestContract = _web3.eth.contract(fundRequestAbi).at(pluginSettings.fundRequestContractAddress);
+            fundRequestContract = _web3.eth.contract(fundRequestAbi).at(pluginSettings.fundRequestContractAddress);
             initFundRepositoryContract();
             //initClaimRepositoryContract();
         }
@@ -787,7 +787,6 @@
 
     function getRequestFundInfo(issueId, callback) {
         fundRepositoryContract.getFundInfo.call(_web3.fromAscii('GITHUB'), String(issueId), pluginSettings.accountAddress, function(err, result) {
-            console.log(result);
             err ? console.log({message: "Something went wrong", error: err}) : callback(result);
         });
     }
@@ -816,13 +815,16 @@
     }
 
     function initIssue(issue) {
-        let issueId = getPlatformIdFromUrl(issue.querySelector('a').href);
-        let opened = issue.querySelector('.opened-by');
+        let issueLink = issue.querySelector('a');
+        if (issueLink !== null) {
+            let issueId = getPlatformIdFromUrl(issueLink.href);
+            let opened = issue.querySelector('.opened-by');
 
-        if (typeof issueId !== 'undefined') {
-            opened.appendChild(createSpan('- Total Funding: ', issueId, loaderHtml, settings.dataNames.funding));
+            if (typeof issueId !== 'undefined' && issueId !== null && issueId.length > 0) {
+                opened.appendChild(createSpan('- Total Funding: ', issueId, loaderHtml, settings.dataNames.funding));
+            }
+            updateIssueStats(issueId);
         }
-        updateIssueStats(issueId);
     }
 
     function initIssueOverview() {
