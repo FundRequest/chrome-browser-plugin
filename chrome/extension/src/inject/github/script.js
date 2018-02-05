@@ -1,36 +1,11 @@
 (function() {
     let fundRequestAbi = [{
-        "constant": false,
-        "inputs": [{"name": "platform", "type": "bytes32"}, {
-            "name": "platformId",
-            "type": "bytes32"
-        }, {"name": "solver", "type": "string"}, {"name": "solverAddress", "type": "address"}, {
-            "name": "r",
-            "type": "bytes32"
-        }, {"name": "s", "type": "bytes32"}, {"name": "v", "type": "uint8"}],
-        "name": "claim",
-        "outputs": [{"name": "", "type": "bool"}],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }, {
         "constant": true,
         "inputs": [],
         "name": "claimSignerAddress",
         "outputs": [{"name": "", "type": "address"}],
         "payable": false,
         "stateMutability": "view",
-        "type": "function"
-    }, {
-        "constant": false,
-        "inputs": [{"name": "_platform", "type": "bytes32"}, {
-            "name": "_platformId",
-            "type": "bytes32"
-        }, {"name": "_url", "type": "string"}, {"name": "_value", "type": "uint256"}],
-        "name": "fund",
-        "outputs": [{"name": "success", "type": "bool"}],
-        "payable": false,
-        "stateMutability": "nonpayable",
         "type": "function"
     }, {
         "constant": false,
@@ -42,11 +17,27 @@
         "type": "function"
     }, {
         "constant": true,
-        "inputs": [{"name": "_platform", "type": "bytes32"}, {"name": "_platformId", "type": "bytes32"}],
-        "name": "balance",
-        "outputs": [{"name": "", "type": "uint256"}],
+        "inputs": [],
+        "name": "fundRepository",
+        "outputs": [{"name": "", "type": "address"}],
         "payable": false,
         "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_claimRepository", "type": "address"}],
+        "name": "setClaimRepository",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_repositoryAddress", "type": "address"}],
+        "name": "setFundRepository",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
         "type": "function"
     }, {
         "constant": true,
@@ -70,22 +61,8 @@
     }, {
         "constant": true,
         "inputs": [],
-        "name": "requestsFunded",
-        "outputs": [{"name": "", "type": "uint256"}],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    }, {
-        "constant": true,
-        "inputs": [{"name": "_platform", "type": "bytes32"}, {
-            "name": "_platformId",
-            "type": "bytes32"
-        }, {"name": "_funder", "type": "address"}],
-        "name": "getFundInfo",
-        "outputs": [{"name": "", "type": "uint256"}, {"name": "", "type": "uint256"}, {
-            "name": "",
-            "type": "uint256"
-        }, {"name": "", "type": "string"}],
+        "name": "claimRepository",
+        "outputs": [{"name": "", "type": "address"}],
         "payable": false,
         "stateMutability": "view",
         "type": "function"
@@ -98,22 +75,6 @@
         "stateMutability": "nonpayable",
         "type": "function"
     }, {
-        "constant": true,
-        "inputs": [],
-        "name": "totalFunded",
-        "outputs": [{"name": "", "type": "uint256"}],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    }, {
-        "constant": true,
-        "inputs": [],
-        "name": "totalBalance",
-        "outputs": [{"name": "", "type": "uint256"}],
-        "payable": false,
-        "stateMutability": "view",
-        "type": "function"
-    }, {
         "constant": false,
         "inputs": [{"name": "_claimSignerAddress", "type": "address"}],
         "name": "setClaimSignerAddress",
@@ -122,12 +83,29 @@
         "stateMutability": "nonpayable",
         "type": "function"
     }, {
-        "constant": true,
-        "inputs": [],
-        "name": "totalNumberOfFunders",
-        "outputs": [{"name": "", "type": "uint256"}],
+        "constant": false,
+        "inputs": [{"name": "platform", "type": "bytes32"}, {"name": "platformId", "type": "string"}, {
+            "name": "solver",
+            "type": "string"
+        }, {"name": "solverAddress", "type": "address"}, {"name": "r", "type": "bytes32"}, {
+            "name": "s",
+            "type": "bytes32"
+        }, {"name": "v", "type": "uint8"}],
+        "name": "claim",
+        "outputs": [{"name": "", "type": "bool"}],
         "payable": false,
-        "stateMutability": "view",
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_platform", "type": "bytes32"}, {
+            "name": "_platformId",
+            "type": "string"
+        }, {"name": "_value", "type": "uint256"}],
+        "name": "fund",
+        "outputs": [{"name": "success", "type": "bool"}],
+        "payable": false,
+        "stateMutability": "nonpayable",
         "type": "function"
     }, {
         "constant": true,
@@ -138,7 +116,10 @@
         "stateMutability": "view",
         "type": "function"
     }, {
-        "inputs": [{"name": "_tokenAddress", "type": "address"}],
+        "inputs": [{"name": "_tokenAddress", "type": "address"}, {
+            "name": "_fundRepository",
+            "type": "address"
+        }, {"name": "_claimRepository", "type": "address"}],
         "payable": false,
         "stateMutability": "nonpayable",
         "type": "constructor"
@@ -148,17 +129,12 @@
             "indexed": false,
             "name": "platform",
             "type": "bytes32"
-        }, {"indexed": false, "name": "platformId", "type": "bytes32"}, {
+        }, {"indexed": false, "name": "platformId", "type": "string"}, {
             "indexed": false,
-            "name": "url",
-            "type": "string"
-        }, {"indexed": false, "name": "value", "type": "uint256"}],
+            "name": "value",
+            "type": "uint256"
+        }],
         "name": "Funded",
-        "type": "event"
-    }, {
-        "anonymous": false,
-        "inputs": [{"indexed": false, "name": "logdata", "type": "string"}],
-        "name": "LOG",
         "type": "event"
     }, {
         "anonymous": false,
@@ -166,7 +142,7 @@
             "indexed": false,
             "name": "platform",
             "type": "bytes32"
-        }, {"indexed": false, "name": "platformId", "type": "bytes32"}, {
+        }, {"indexed": false, "name": "platformId", "type": "string"}, {
             "indexed": false,
             "name": "solver",
             "type": "string"
@@ -456,14 +432,212 @@
         "name": "Approval",
         "type": "event"
     }];
+    let fundRepositoryAbi = [{
+        "constant": true,
+        "inputs": [{"name": "_platform", "type": "bytes32"}, {"name": "_platformId", "type": "string"}],
+        "name": "getFunderCount",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [{"name": "_platform", "type": "bytes32"}, {"name": "_platformId", "type": "string"}],
+        "name": "balance",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "platform", "type": "bytes32"}, {"name": "platformId", "type": "string"}],
+        "name": "resolveFund",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_from", "type": "address"}, {
+            "name": "_platform",
+            "type": "bytes32"
+        }, {"name": "_platformId", "type": "string"}, {"name": "_value", "type": "uint256"}],
+        "name": "updateFunders",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [{"name": "", "type": "address"}],
+        "name": "callers",
+        "outputs": [{"name": "", "type": "bool"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_from", "type": "address"}, {
+            "name": "_platform",
+            "type": "bytes32"
+        }, {"name": "_platformId", "type": "string"}, {"name": "_value", "type": "uint256"}],
+        "name": "updateBalances",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "owner",
+        "outputs": [{"name": "", "type": "address"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "requestsFunded",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [{"name": "_platform", "type": "bytes32"}, {
+            "name": "_platformId",
+            "type": "string"
+        }, {"name": "_funder", "type": "address"}],
+        "name": "amountFunded",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_newOwner", "type": "address"}],
+        "name": "changeOwner",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "totalFunded",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "totalBalance",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [{"name": "_platform", "type": "bytes32"}, {
+            "name": "_platformId",
+            "type": "string"
+        }, {"name": "_funder", "type": "address"}],
+        "name": "getFundInfo",
+        "outputs": [{"name": "", "type": "uint256"}, {"name": "", "type": "uint256"}, {"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "totalNumberOfFunders",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_caller", "type": "address"}, {"name": "allowed", "type": "bool"}],
+        "name": "updateCaller",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {"inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor"}];
+    let claimRepositoryAbi = [{
+        "constant": false,
+        "inputs": [{"name": "_solverAddress", "type": "address"}, {
+            "name": "_platform",
+            "type": "bytes32"
+        }, {"name": "_platformId", "type": "string"}, {"name": "_solver", "type": "string"}, {
+            "name": "_requestBalance",
+            "type": "uint256"
+        }],
+        "name": "addClaim",
+        "outputs": [{"name": "", "type": "bool"}],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "totalClaims",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [{"name": "", "type": "address"}],
+        "name": "callers",
+        "outputs": [{"name": "", "type": "bool"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "owner",
+        "outputs": [{"name": "", "type": "address"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_newOwner", "type": "address"}],
+        "name": "changeOwner",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "constant": true,
+        "inputs": [],
+        "name": "totalBalanceClaimed",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "constant": false,
+        "inputs": [{"name": "_caller", "type": "address"}, {"name": "allowed", "type": "bool"}],
+        "name": "updateCaller",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {"inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor"}];
+
+    // TODO: already show button and stats, before initializing contract
 
     let zeroAddress = '0x0000000000000000000000000000000000000000';
     let tokenContract;
     let fundRequestContract;
+    let fundRepositoryContract = null;
+    let claimRepositoryContract = null;
     let _web3;
     let loaderHtml = '<i class="fnd-loader fnd-loader--small"></i>';
-
-    let contractInitialized = false;
 
     let pluginSettings = {
         accountAddress: zeroAddress
@@ -477,8 +651,28 @@
     };
 
     function init() {
-        initIssueDetail();
-        initIssueOverview();
+        initContracts();
+        let interval = setInterval(function() {
+            if(contractsInitialized()) {
+                window.clearInterval(interval);
+                initIssueDetail();
+                initIssueOverview();
+            }
+        }, 100);
+    }
+
+    function contractsInitialized() {
+        return fundRepositoryContract !== null;
+    }
+
+    function getCurrentIssueUrl() {
+        let url = 'https://github.com' + document.querySelector('#partial-discussion-header').dataset.url;
+        url = url.split('/show_partial')[0];
+        return url;
+    }
+
+    function getCurrentPlatformId() {
+        return getPlatformIdFromUrl(getCurrentIssueUrl());
     }
 
     function initDocumentEvents() {
@@ -496,13 +690,43 @@
         return str.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
     }
 
-    function initContracts() {
-        if (!contractInitialized) {
-            contractInitialized = true;
-            _web3 = new Web3(new Web3.providers.HttpProvider(pluginSettings.providerApi));
-            tokenContract = _web3.eth.contract(tokenAbi).at(pluginSettings.tokenContractAddress);
-            fundRequestContract = _web3.eth.contract(fundRequestAbi).at(pluginSettings.fundRequestContractAddress);
+    function getPlatformIdFromUrl(issueLink) {
+        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues\/(\d+)$/.exec(issueLink);
+        if (matches && matches.length >= 4) {
+            return matches[2] + '|FR|' + matches[3] + '|FR|' + matches[4];
+        } else {
+            return null;
         }
+    }
+
+    function initContracts() {
+        if (!contractsInitialized()) {
+            _web3 = new Web3(new Web3.providers.HttpProvider(pluginSettings.providerApi));
+            //tokenContract = _web3.eth.contract(tokenAbi).at(pluginSettings.tokenContractAddress);
+            //fundRequestContract = _web3.eth.contract(fundRequestAbi).at(pluginSettings.fundRequestContractAddress);
+            initFundRepositoryContract();
+            //initClaimRepositoryContract();
+        }
+    }
+
+    function initFundRepositoryContract() {
+        fundRequestContract.fundRepository.call(function(err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                fundRepositoryContract = _web3.eth.contract(fundRepositoryAbi).at(result);
+            }
+        });
+    }
+
+    function initClaimRepositoryContract() {
+        fundRequestContract.claimRepository.call(function(err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                claimRepositoryContract = _web3.eth.contract(claimRepositoryAbi).at(result);
+            }
+        });
     }
 
     function weiToString(amountInWei) {
@@ -562,7 +786,8 @@
     }
 
     function getRequestFundInfo(issueId, callback) {
-        fundRequestContract.getFundInfo.call(_web3.fromAscii('GITHUB'), _web3.fromAscii(String(issueId)), pluginSettings.accountAddress, function(err, result) {
+        fundRepositoryContract.getFundInfo.call(_web3.fromAscii('GITHUB'), String(issueId), pluginSettings.accountAddress, function(err, result) {
+            console.log(result);
             err ? console.log({message: "Something went wrong", error: err}) : callback(result);
         });
     }
@@ -591,7 +816,7 @@
     }
 
     function initIssue(issue) {
-        let issueId = issue.dataset.id;
+        let issueId = getPlatformIdFromUrl(issue.querySelector('a').href);
         let opened = issue.querySelector('.opened-by');
 
         if (typeof issueId !== 'undefined') {
@@ -603,7 +828,6 @@
     function initIssueOverview() {
         let issues = document.querySelectorAll('[data-id]');
         if (issues.length > 0) {
-            initContracts();
             for (let i = 0; i < issues.length; i++) {
                 initIssue(issues[i]);
             }
@@ -614,11 +838,10 @@
         let issueContainer = document.querySelector('#show_issue');
 
         if (issueContainer !== null) {
-            initContracts();
 
             let actions = issueContainer.querySelector('.gh-header-actions');
             let sidebar = issueContainer.querySelector('#partial-discussion-sidebar');
-            let issueId = issueContainer.querySelector('[name="issue_id"]').value;
+            let issueId = getCurrentPlatformId();
 
             button = document.createElement('button');
             button.innerHTML = 'Fund';
@@ -643,8 +866,7 @@
             updateIssueStats(issueId);
 
             button.addEventListener("click", function() {
-                let url = 'https://github.com' + document.querySelector('#partial-discussion-header').dataset.url;
-                url = url.split('/show_partial')[0];
+                let url = getCurrentIssueUrl();
                 chrome.extension.sendMessage({
                     action: 'fund',
                     url: url
