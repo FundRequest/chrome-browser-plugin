@@ -4,8 +4,8 @@
     let store = new Store('settings');
     let settings = {
         accountAddress: store.get('fndAccountAddress'),
-        tokenContractAddress: store.get('fndTokenContractAddress') || '0x5a481b10a0138e0db94126e9b6ca2188a18cb21c',
-        fundRequestContractAddress: store.get('fndFundRequestContractAddress') || '0x0a0d468e58a8ddb2817635fe4bef039046de8a14',
+        tokenContractAddress: store.get('fndTokenContractAddress') || '0x23b98d4ff90a169d88bfab8b8829f0b0c0e3bce0',
+        fundRequestContractAddress: store.get('fndFundRequestContractAddress') || '0xc1b66749fe5e2a15034b882da9e690490d5a1336',
         providerApi: store.get('fndProviderApi') || 'https://ropsten.fundrequest.io',
         fundUrlPrefix: store.get('fndFundUrlPrefix') || 'https://alpha.fundrequest.io/#/requests/fund?url=',
         optionsUrl: ''
