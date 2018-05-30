@@ -1,6 +1,6 @@
 <template>
     <span>
-        <button class="btn btn-sm btn-danger" @click="claim()">
+        <button v-if="requestFundInfo != null && requestFundInfo.totalFunders > 0" class="btn btn-sm btn-danger" @click="claim()">
             Claim
         </button>
         <button class="btn btn-sm btn-blue" @click="fund()">
@@ -11,21 +11,30 @@
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
     import BrowserPlugin from "../../classes/BrowserPlugin";
-    import Github from "./Github";
-    import Settings from "../../models/Settings";
+    import Github, {RequestFundInfo} from "./Github";
 
     @Component
     export default class GithubButtons extends Vue {
-        @Prop() settings: Settings;
+        @Prop() issueId: string;
 
-        public fund() {
-            let url = Github.getCurrentIssueUrl();
-            BrowserPlugin.fund(url);
+        public requestFundInfo: RequestFundInfo = null;
+        public url: string = null;
+
+        mounted() {
+            this.init();
         }
 
-        public claim() {
-            let url = Github.getCurrentIssueUrl();
-            BrowserPlugin.claim(url);
+        private async init() {
+            this.url = Github.getCurrentIssueUrl();
+            this.requestFundInfo = await Github.getRequestFundInfo(this.issueId);
+        }
+
+        public fund() {
+            BrowserPlugin.fund(this.url);
+        }
+
+        public async claim() {
+            BrowserPlugin.claim(this.url);
         }
     }
 </script>

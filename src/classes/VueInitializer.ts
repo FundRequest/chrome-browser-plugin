@@ -3,7 +3,7 @@ import Utils from './Utils';
 
 export default class VueInitializer {
 
-    public static createComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any>) {
+    public static createComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null) {
         let vueInstance = VueInitializer._initComponent(containerElement, classAttr, ComponentClass, props);
 
         document.addEventListener('pjax:complete', () => {
@@ -13,7 +13,7 @@ export default class VueInitializer {
         });
     }
 
-    private static _initComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any>): Vue {
+    private static _initComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null): Vue {
         let id = `a${Utils.generateUUID()}`;
 
         if (containerElement) {
@@ -30,7 +30,7 @@ export default class VueInitializer {
                     let VueComponentClass = Vue.extend(ComponentClass);
                     let instance = new VueComponentClass();
 
-                    for(let prop in props) {
+                    for (let prop in props) {
                         instance.$props[prop] = props[prop];
 
                     }
@@ -42,35 +42,4 @@ export default class VueInitializer {
             return null;
         }
     }
-
-    /*
-    public static assignComponent(selector, ComponentClass, settings) {
-        let vueInstance = VueInitializer._initAssignComponent(selector, ComponentClass, settings);
-
-        document.addEventListener('pjax:complete', () => {
-            if(vueInstance) {
-                vueInstance.$destroy();
-            }
-            vueInstance = VueInitializer._initAssignComponent(selector, ComponentClass, settings);
-        });
-    }
-
-    private static _initAssignComponent(selector, ComponentClass, settings): Vue {
-        let container = (<HTMLElement>document.querySelector(selector));
-
-        if (container) {
-            container.setAttribute('is', 'github-overview-item');
-            container.setAttribute('inline-template', 'true');
-
-            return new Vue({
-                el: `#${container.id}`,
-                data: {},
-                mounted() {
-                }
-            });
-        } else {
-            return null;
-        }
-    }
-     */
 }

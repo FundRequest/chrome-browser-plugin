@@ -5,15 +5,18 @@ import VueInitializer from "../../classes/VueInitializer";
 import BrowserPlugin from "../../classes/BrowserPlugin";
 import Contracts from "../../classes/Contracts";
 import {Web3x} from "../../classes/Web3x";
-import Settings from "../../models/Settings";
+import Settings from "../../classes/Settings";
 import BigNumber from 'bignumber.js';
+import Utils from "../../classes/Utils";
+
+export interface RequestFundInfo {
+    totalFunders: string;
+    totalFunding: string;
+    yourFunding: string;
+}
 
 export default class Github {
     private static instance: Github;
-
-    private settings: Settings = {
-        accountAddress: '0x0000000000000000000000000000000000000000'
-    };
 
     public static getInstance(): Github {
         if (!Github.instance) {
@@ -24,23 +27,21 @@ export default class Github {
 
     constructor() {
         BrowserPlugin.load((response) => {
-            this.settings = Object.assign(this.settings, response);
             let readyStateCheckInterval = setInterval(() => {
                 if (document.readyState === "complete") {
                     clearInterval(readyStateCheckInterval);
 
-                    Github.init(this.settings);
+                    Github.init();
                     document.addEventListener('pjax:complete', () => {
-                        Github.init(this.settings);
+                        Github.init();
                     });
                 }
             }, 10);
         });
     }
 
-    private static init(settings: Settings) {
+    private static init() {
         let props = [];
-        props['settings'] = settings;
         props['issueId'] = Github.getCurrentPlatformId();
         VueInitializer.createComponent(document.querySelector('#partial-discussion-sidebar'), 'fnd-sidebar-issue-funds discussion-sidebar-item discussion-sidebar-item--fnd', GithubSidebarWidget, props);
         VueInitializer.createComponent(document.querySelector('#partial-discussion-header .gh-header-actions'), 'fnd-action-buttons', GithubButtons, props);
@@ -55,13 +56,28 @@ export default class Github {
         }
     }
 
-    public async getRequestFundInfo(issueId): Promise<[BigNumber, BigNumber, BigNumber]> {
-        return (await Contracts.getInstance().getFundRepository()).getFundInfo(Web3x.getInstance().fromAscii("GITHUB"), String(issueId), this.settings.accountAddress, Contracts.getInstance().tokenContractAddress);
+    public static async getRequestFundInfo(issueId): Promise<RequestFundInfo> {
+        let account =  await Settings.getEthAddress();
+        let tokenAddress =  await Settings.getTokenContractAddress();
+        let platform = (await Web3x.getInstance()).fromAscii("GITHUB");
+
+        let result: [BigNumber, BigNumber, BigNumber] = await (await Contracts.getInstance().getFundRepository()).getFundInfo(
+            platform,
+            String(issueId),
+            account || '',
+            tokenAddress
+        );
+
+        return {
+            totalFunders: result[0].toString(),
+            totalFunding: Utils.weiToString(result[1]),
+            yourFunding: Utils.weiToString(result[2])
+        } as RequestFundInfo;
     }
 
     public static getCurrentIssueUrl() {
         let header: HTMLElement = (<HTMLElement>document.querySelector('#partial-discussion-header'));
-        if(header) {
+        if (header) {
             let url = `https://github.com${header.dataset.url}`;
             return url.split('/show_partial')[0];
         } else {

@@ -1,5 +1,5 @@
 {
-  "name": "FundRequest 2",
+  "name": "FundRequest",
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "Extension to fund github issues using the fundrequest platform.",
