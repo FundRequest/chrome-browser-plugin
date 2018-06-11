@@ -1,5 +1,5 @@
 <template>
-    <span v-if="requestFundInfo != null"> | Total Funding: {{requestFundInfo.totalFunding}} FND </span>
+    <span class="mr-2" v-if="requestFundInfo != null"> | Total Funding: {{requestFundInfo.totalFunding}} FND </span>
 </template>
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";

@@ -25,14 +25,14 @@
         "https://github.com/*"
       ],
       "js": [
-        "vendors/web3.min.js",
+        "vendors/web3/js/web3.min.js",
         "js/vendor.js",
         "js/github.js"
+      ],
+      "css": [
+        //"src/inject/github/github.fnd.css",
+        "vendors/iziToast/css/iziToast.min.css"
       ]
-      /* "css": [
-       //  "src/inject/github/github.fnd.css",
-       //  "src/vendors/iziToast/css/iziToast.min.css"
-       ]*/
     },
     {
       "matches": [

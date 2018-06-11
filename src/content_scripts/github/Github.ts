@@ -43,15 +43,21 @@ export default class Github {
     private static init() {
         let props = [];
         props['issueId'] = Github.getCurrentPlatformId();
-        VueInitializer.createComponent(document.querySelector('#partial-discussion-sidebar'), 'fnd-sidebar-issue-funds discussion-sidebar-item discussion-sidebar-item--fnd', GithubSidebarWidget, props);
-        VueInitializer.createComponent(document.querySelector('#partial-discussion-header .gh-header-actions'), 'fnd-action-buttons', GithubButtons, props);
-        let issues = document.querySelectorAll('.issues-listing ul.js-navigation-container.js-active-navigation-container [data-id]');
-        if (issues.length > 0) {
-            for (let i = 0; i < issues.length; i++) {
-                let href = (<HTMLAnchorElement>issues[i].querySelector('.js-navigation-open')).href;
-                let meta: HTMLElement = issues[i].querySelector('.issue-meta-section');
-                props['issueId'] = Github.getPlatformIdFromUrl(href);
-                VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, props);
+
+        if(props['issueId'] != null) {
+            VueInitializer.createComponent(document.querySelector('#partial-discussion-sidebar'), 'fnd-sidebar-issue-funds discussion-sidebar-item discussion-sidebar-item--fnd', GithubSidebarWidget, props);
+            VueInitializer.createComponent(document.querySelector('#partial-discussion-header .gh-header-actions'), 'fnd-action-buttons', GithubButtons, props);
+        }
+
+        if(Github.containsCurrentPageIssues()) {
+            let issues = document.querySelectorAll('.issues-listing ul.js-navigation-container.js-active-navigation-container [data-id]');
+            if (issues.length > 0) {
+                for (let i = 0; i < issues.length; i++) {
+                    let href = (<HTMLAnchorElement>issues[i].querySelector('.js-navigation-open')).href;
+                    let meta: HTMLElement = issues[i].querySelector('.issue-meta-section');
+                    props['issueId'] = Github.getPlatformIdFromUrl(href);
+                    VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, props);
+                }
             }
         }
     }
@@ -96,6 +102,11 @@ export default class Github {
         } else {
             return null;
         }
+    }
+
+    private static containsCurrentPageIssues() {
+        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues/i.exec(location.href);
+        return matches && matches.length >= 3;
     }
 }
 

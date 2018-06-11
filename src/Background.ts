@@ -51,7 +51,9 @@ export class Background {
                 case 'fund':
                     this.openFundTab(currentTabId, id, request, sendResponse);
                     break;
-
+                default:
+                    sendResponse();
+                    break;
             }
             return true;
         });

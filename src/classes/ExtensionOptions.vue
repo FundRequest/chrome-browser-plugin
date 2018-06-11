@@ -14,8 +14,8 @@
             <label for="network">Network</label>
             <select v-model="network" id="network" class="form-control">
                 <option value="main" selected>Main net</option>
-                <option value="kovan">Kovan test net</option>
-                <option value="local">Local test net</option>
+                <option value="dev">Development (uses kovan)</option>
+                <option value="local">Local (only when running platform locally)</option>
             </select>
         </div>
         <div class="alert alert-success" v-if="status != null">{{status}}</div>

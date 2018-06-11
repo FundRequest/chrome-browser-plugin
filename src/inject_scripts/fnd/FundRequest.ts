@@ -8,6 +8,7 @@ export class FundRequest {
     constructor() {
         chrome.runtime.onMessage.addListener(
             function (message, sender, sendResponse) {
+                console.log("browserplugin.from.extension.fnd.opened");
                 document.dispatchEvent(new CustomEvent('browserplugin.from.extension.fnd.opened'));
 
                 // event send from app when tab is closed after funding
@@ -21,7 +22,11 @@ export class FundRequest {
                         cancelButtonText: 'Show your requests',
                     }).then(result => {
                         if (result.value) {
-                            sendResponse({id: message.id, success: true, message: event.detail.body});
+                            sendResponse({
+                                id: message.id,
+                                success: true,
+                                message: event.detail.body ? event.detail.body : ''
+                            });
                         } else {
                             window.location.href = event.detail.redirectLocation;
                         }
@@ -36,6 +41,8 @@ export class FundRequest {
             }
         );
     }
+
+
 }
 
 new FundRequest();

@@ -1,4 +1,5 @@
-//import iziToast from 'iziToast';
+import iziToast from "izitoast";
+import Settings from "./Settings";
 
 declare let chrome: any;
 
@@ -45,17 +46,19 @@ export default class BrowserPlugin {
         }, response => {
             if (response.done) {
                 if (response.success) {
-                    console.log('funded', response.message);
-                    //iziToast.success({
-                    //    title: 'Funded!',
-                    //    message: response.message
-                    //});
+                    if (response.message && response.message.length > 0) {
+                        Settings.getTransactionUrl(response.message).then((url) => {
+                            iziToast.success({
+                                title: 'Funded!',
+                                message: `<a href="${url}" target="_blank">Check the transaction here: ${response.message.substr(0, 15)}...</a>`
+                            });
+                        });
+                    }
                 } else {
-                    console.log('Not Funded :(', 'Something went wrong.');
-                    //iziToast.warning({
-                    //    title: 'Not Funded :(',
-                    //    message: 'Something went wrong.'
-                    //});
+                    iziToast.warning({
+                        title: 'Not Funded :(',
+                        message: 'Something went wrong.'
+                    });
                 }
             }
         });
