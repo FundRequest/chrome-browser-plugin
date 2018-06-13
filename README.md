@@ -1,29 +1,16 @@
-# Chrome Extension TypeScript Starter
+# Chrome Extension FundRequest
 
-[![Build Status](https://travis-ci.org/chibat/chrome-extension-typescript-starter.svg?branch=master)](https://travis-ci.org/chibat/chrome-extension-typescript-starter)
-
-Chrome Extension, TypeScript and Visual Studio Code
+Chrome Extension, TypeScript
 
 ## Prerequisites
 
 * [node + npm](https://nodejs.org/) (Current Version)
 
-## Option
-
-* [Visual Studio Code](https://code.visualstudio.com/)
-
 ## Includes the following
 
 * TypeScript
 * Webpack
-* Moment.js
 * jQuery
-* Example Code
-    * Chrome Storage
-    * Options Version 2
-    * content script
-    * count up badge number
-    * background
 
 ## Project Structure
 
@@ -36,26 +23,17 @@ Chrome Extension, TypeScript and Visual Studio Code
 ```
 npm install
 ```
-
-## Import as Visual Studio Code project
-
 ...
 
-## Build by watch mode
-
-### terminal
+## Build
 
 ```
 npm run build
 ```
 
-### Visual Studio Code
+## Build in watch mode
 
-Run watch mode.
-
-type `Ctrl + Shift + B`
-
-## Load extension to chrome
-
-Load `dist` directory
+```
+npm run watch
+```
 

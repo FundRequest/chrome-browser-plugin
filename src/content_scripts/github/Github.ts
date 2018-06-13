@@ -81,6 +81,11 @@ export default class Github {
         } as RequestFundInfo;
     }
 
+    public static getUserLoginName(): string {
+        let userNameMeta = document.head.querySelector("[name=\"user-login\"]");
+        return userNameMeta ? userNameMeta.getAttribute("content") : "";
+    }
+
     public static getCurrentIssueUrl() {
         let header: HTMLElement = (<HTMLElement>document.querySelector('#partial-discussion-header'));
         if (header) {

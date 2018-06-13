@@ -1,5 +1,7 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
+import {Claimable} from "./Claimable";
+import {IssueProperties} from "./IssueProperties";
 
 export default class Settings {
     private static settings = null;
@@ -76,13 +78,20 @@ export default class Settings {
         return `${url}/fund/github?url=${githubUrl}`;
     }
 
-    public static async getClaimUrl(githubUrl: string) { //owner: string, repo: string, issueNumber: string): Promise<string> {
-        let matches = /^https:\/\/github\.com\/(.+)\/(.+)\/issues\/(\d+)$/i.exec(githubUrl);
-        let owner = matches[1];
-        let repo = matches[2];
-        let issueNumber = Number.parseInt(matches[3]);
+    public static async getClaimUrl(githubUrl: string): Promise<string> {
+        let props = Settings.getIssueProperties(githubUrl);
         let url = await Settings.getFundrequestUrl();
-        return `${url}/requests/github/${owner}/${repo}/${issueNumber}`;
+        return `${url}/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
+    }
+
+    public static async getClaimablePropertiesUrl(githubUrl: string): Promise<string> {
+        let props = Settings.getIssueProperties(githubUrl);
+        let url = await Settings.getFundrequestUrl();
+        return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}/claimable`;
+    }
+
+    public static async getClaimableProperties(githubUrl: string): Promise<Claimable> {
+        return await Utils.getJSON(await Settings.getClaimablePropertiesUrl(githubUrl));
     }
 
     public static getOptionsUrl(): string {
@@ -91,6 +100,16 @@ export default class Settings {
 
     public static async getNetwork(): Promise<string> {
         return BrowserPlugin.get('network', 'main');
+    }
+
+    private static getIssueProperties(githubUrl: string): IssueProperties {
+        let matches = /^https:\/\/github\.com\/(.+)\/(.+)\/issues\/(\d+)$/i.exec(githubUrl);
+        let issueProperties = new IssueProperties();
+        issueProperties.owner = matches[1];
+        issueProperties.repo = matches[2];
+        issueProperties.issueNumber = Number.parseInt(matches[3]);
+
+        return issueProperties;
     }
 
     private static get mainUrl() {
