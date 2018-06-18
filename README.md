@@ -1,5 +1,4 @@
-# Chrome Extension FundRequest
-
+## Chrome Extension FundRequest <img align="right" src="https://github.com/FundRequest.png?size=30" />
 Chrome Extension, TypeScript
 
 ## Prerequisites
@@ -36,4 +35,3 @@ npm run build
 ```
 npm run watch
 ```
-
