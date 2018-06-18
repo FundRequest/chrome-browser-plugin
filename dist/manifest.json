@@ -30,7 +30,6 @@
         "js/github.js"
       ],
       "css": [
-        //"src/inject/github/github.fnd.css",
         "vendors/iziToast/css/iziToast.min.css"
       ]
     },
