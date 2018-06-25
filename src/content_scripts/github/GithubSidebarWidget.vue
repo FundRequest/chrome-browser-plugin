@@ -4,7 +4,7 @@
             FundRequest
 
             <span v-if="!isLoading && isExistingIssue"
-                  class="label label-color float-right" :class="`label-${requestDetails.status.toLowerCase()}`">{{requestDetails.status}}</span>
+                  class="label label-color float-right" :class="`label-${statusClass}`">{{requestDetails.status}}</span>
 
 
             <div v-if="!isLoading && !isExistingIssue">
@@ -100,6 +100,15 @@
             this.init();
         }
 
+        public get statusClass() {
+            let className = this.requestDetails.status.toLowerCase();
+            return className.replace(/\s/g, '-');
+        }
+
+        public openOptions() {
+            BrowserPlugin.openOptions();
+        }
+
         private async init() {
             this.isClaimed = await this.githubRequest.isClaimed();
 
@@ -126,10 +135,6 @@
                 this.totalFunders = await this.githubRequest.getTotalFunders();
                 this.isExistingIssue = true;
             }
-        }
-
-        public openOptions() {
-            BrowserPlugin.openOptions();
         }
     }
 </script>
@@ -170,6 +175,7 @@
         background-color: #49b2e1;
     }
 
+    .label-claim-requested,
     .label-claimable {
         color: #ffffff;
         background-color: #44cc11;

@@ -12,7 +12,7 @@ export default class RequestDetails {
     platform: string;
     repo: string;
     starred: boolean;
-    status:  "Funded" | "Claimed" | "Claimable";
+    status:  "Funded" | "Claimed" | "Claimable" | "Claim Requested";
     technologies: string[];
     title: string;
 }
