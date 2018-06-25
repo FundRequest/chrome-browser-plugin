@@ -11,8 +11,11 @@ export default class Settings {
         let network = await Settings.getNetwork();
         let url = "";
         switch (network) {
-            case 'main':
+            case 'prod':
                 url = Settings.mainUrl;
+                break;
+            case 'staging':
+                url = Settings.stagingUrl;
                 break;
             case 'dev':
                 url = Settings.devUrl;
@@ -28,12 +31,11 @@ export default class Settings {
         let network = await Settings.getNetwork();
         let url = "";
         switch (network) {
-            case 'main':
+            case 'prod':
                 url = `https://etherscan.io/tx/${transactionId}`;
                 break;
+            case 'staging':
             case 'dev':
-                url = `https://kovan.etherscan.io/tx/${transactionId}`;
-                break;
             case 'local':
                 url = `https://kovan.etherscan.io/tx/${transactionId}`;
                 break;
@@ -110,7 +112,7 @@ export default class Settings {
     }
 
     public static async getNetwork(): Promise<string> {
-        return BrowserPlugin.get('network', 'main');
+        return BrowserPlugin.get('network', 'prod');
     }
 
     private static getIssueProperties(githubUrl: string): IssueProperties {
@@ -129,6 +131,10 @@ export default class Settings {
 
     private static get devUrl() {
         return 'https://dev-web.fundrequest.io';
+    }
+
+    private static get stagingUrl() {
+        return 'https://staging.fundrequest.io';
     }
 
     private static get localUrl() {
