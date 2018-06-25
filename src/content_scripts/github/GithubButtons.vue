@@ -3,7 +3,7 @@
         <button v-if="isClaimable" class="btn btn-sm btn-danger" @click="claim()">
             Claim
         </button>
-        <button class="btn btn-sm btn-blue" @click="fund()">
+        <button v-if="!isClaimed" class="btn btn-sm btn-blue" @click="fund()">
             Fund
         </button>
     </span>
@@ -11,8 +11,8 @@
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
     import BrowserPlugin from "../../classes/BrowserPlugin";
-    import Github, {RequestFundInfo} from "./Github";
-    import {Claimable} from "../../classes/Claimable";
+    import Github from "./Github";
+    import Claimable from "../../classes/models/Claimable";
     import Settings from "../../classes/Settings";
     import iziToast from "izitoast";
 
@@ -20,8 +20,8 @@
     export default class GithubButtons extends Vue {
         @Prop() issueId: string;
 
-        public requestFundInfo: RequestFundInfo = null;
         public claimableProperties: Claimable = null;
+        public isClaimed: boolean = true;
         public isClaimable: boolean = false;
         public isClaimableByCurrentUser: boolean = false;
         public url: string = null;
@@ -32,13 +32,17 @@
         }
 
         private async init() {
-            this.username = Github.getUserLoginName();
-            this.url = Github.getCurrentIssueUrl();
-            this.claimableProperties = await Settings.getClaimableProperties(this.url);
+            this.isClaimed = await Github.isClaimed(this.issueId);
 
-            if (this.claimableProperties) {
-                this.isClaimable = this.claimableProperties.claimable;
-                this.isClaimableByCurrentUser = this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase();
+            if (!this.isClaimed) {
+                this.username = Github.getUserLoginName();
+                this.url = Github.getCurrentIssueUrl();
+                this.claimableProperties = await Settings.getClaimableProperties(this.url);
+
+                if (this.claimableProperties) {
+                    this.isClaimable = this.claimableProperties.claimable;
+                    this.isClaimableByCurrentUser = this.isClaimable && this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase();
+                }
             }
         }
 
@@ -47,7 +51,7 @@
         }
 
         public async claim() {
-            if(this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase()) {
+            if (this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase()) {
                 BrowserPlugin.claim(this.url);
             } else {
                 iziToast.warning({

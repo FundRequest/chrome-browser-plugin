@@ -48,6 +48,10 @@ export default class Utils {
         return Utils.formatToCrypto(number);
     }
 
+    public static weiToNumber(amountInWei: any): number {
+        return (+amountInWei / 1000000000000000000);
+    }
+
     public static generateUUID(): string {
         return uuid();
     }

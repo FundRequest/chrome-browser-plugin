@@ -1,7 +1,8 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
-import {Claimable} from "./Claimable";
-import {IssueProperties} from "./IssueProperties";
+import Claimable from "./models/Claimable";
+import IssueProperties from "./models/IssueProperties";
+import RequestDetails from "./models/RequestDetails";
 
 export default class Settings {
     private static settings = null;
@@ -90,8 +91,18 @@ export default class Settings {
         return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}/claimable`;
     }
 
+    public static async getRequestDetailsUrl(githubUrl: string): Promise<string> {
+        let props = Settings.getIssueProperties(githubUrl);
+        let url = await Settings.getFundrequestUrl();
+        return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
+    }
+
+    public static async getRequestDetails(githubUrl: string): Promise<RequestDetails> {
+        return Object.assign(new RequestDetails(), await Utils.getJSON(await Settings.getRequestDetailsUrl(githubUrl)));
+    }
+
     public static async getClaimableProperties(githubUrl: string): Promise<Claimable> {
-        return await Utils.getJSON(await Settings.getClaimablePropertiesUrl(githubUrl));
+        return Object.assign(new Claimable(), await Utils.getJSON(await Settings.getClaimablePropertiesUrl(githubUrl)));
     }
 
     public static getOptionsUrl(): string {
