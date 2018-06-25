@@ -66,10 +66,6 @@ export default class Contracts {
         }
     }
 
-    //public static getPossibleTokens(platformId: string): Promise<TokenInfo[]> {
-    //    return Utils.getJSON("/rest/fund/allowed-tokens?platform=GITHUB&platformId=" + encodeURIComponent(platformId));
-    //}
-
     public static getInstance() {
         if (!Contracts.instance) {
             Contracts.instance = new Contracts();

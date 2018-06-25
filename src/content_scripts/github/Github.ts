@@ -3,20 +3,15 @@ import GithubSidebarWidget from "./GithubSidebarWidget.vue";
 import GithubOverviewItemFunds from "./GithubOverviewItemFunds.vue";
 import VueInitializer from "../../classes/VueInitializer";
 import BrowserPlugin from "../../classes/BrowserPlugin";
-import Contracts from "../../classes/Contracts";
-import {Web3x} from "../../classes/Web3x";
-import Settings from "../../classes/Settings";
-import BigNumber from 'bignumber.js';
-import {FundRepository} from "../../contracts/FundRepository";
-import Utils from "../../classes/Utils";
-import {ClaimRepository} from "../../contracts/ClaimRepository";
+import GithubRequest from "../../classes/platforms/GithubRequest";
 
 /**
  * @class Github
- * @classdesc Initializes fundrequest functionality in github. Also reinits everything when github does a soft refresh.
+ * @desc Initializes fundrequest functionality in github. Also reinits everything when github does a soft refresh.
  */
 export default class Github {
     private static instance: Github;
+    private static currentGithubRequest: GithubRequest = null;
 
     /**
      * @desc Get a Github.class instance
@@ -45,10 +40,13 @@ export default class Github {
     }
 
     private static init() {
-        let props = [];
-        props['issueId'] = Github.getCurrentPlatformId();
+        Github.currentGithubRequest = null; // reset this to null will remove it available for garbage collection
+        let platformId = Github.getCurrentPlatformId();
 
-        if (props['issueId'] != null) {
+        if (platformId != null) {
+            Github.currentGithubRequest = new GithubRequest(platformId);
+            let props = [];
+            props['githubRequest'] = Github.currentGithubRequest;
             VueInitializer.createComponent(document.querySelector('#partial-discussion-sidebar'), 'fnd-sidebar-issue-funds discussion-sidebar-item discussion-sidebar-item--fnd', GithubSidebarWidget, props);
             VueInitializer.createComponent(document.querySelector('#partial-discussion-header .gh-header-actions'), 'fnd-action-buttons', GithubButtons, props);
         }
@@ -57,90 +55,14 @@ export default class Github {
             let issues = document.querySelectorAll('.issues-listing ul.js-navigation-container.js-active-navigation-container [data-id]');
             if (issues.length > 0) {
                 for (let i = 0; i < issues.length; i++) {
+                    let currentProps = [];
                     let href = (<HTMLAnchorElement>issues[i].querySelector('.js-navigation-open')).href;
                     let meta: HTMLElement = issues[i].querySelector('.issue-meta-section');
-                    props['issueId'] = Github.getPlatformIdFromUrl(href);
-                    VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, props);
+                    currentProps['platformId'] = Github.getPlatformIdFromUrl(href);
+                    VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, currentProps);
                 }
             }
         }
-    }
-
-    /**
-     * @async
-     * @desc Get's total funders of a github issue.
-     * @param issueId
-     * @returns {Promise<number>}
-     */
-    public static async totalFunders(issueId): Promise<number> {
-        const platform = (await Web3x.getInstance()).fromAscii("GITHUB");
-        const repo: FundRepository = (await Contracts.getInstance().getFundRepository());
-
-        const result: BigNumber = await repo.getFunderCount(
-            platform,
-            String(issueId)
-        );
-
-        return result.toNumber();
-    }
-
-    /**
-     * @async
-     * @desc Get's your funding amount of a github issue.
-     * @param issueId
-     * @returns {Promise<Map<string, number>>}
-     */
-    public static async getYourFunding(issueId): Promise<Map<string, number>> {
-        const account = await Settings.getEthAddress();
-        const platform = (await Web3x.getInstance()).fromAscii("GITHUB");
-        const repo: FundRepository = await Contracts.getInstance().getFundRepository();
-
-        let yourFunding: Map<string, number> = new Map();
-
-        const result: BigNumber = await repo.getFunderCount(
-            platform,
-            String(issueId)
-        );
-
-        for (let i = 0; i < result.toNumber(); i++) {
-            let address = await repo.getFundedTokensByIndex(platform, issueId, i);
-            let amount = Utils.weiToNumber(await repo.amountFunded(platform, issueId, account, address));
-            yourFunding.set(address, amount);
-        }
-
-        return yourFunding;
-    }
-
-    /**
-     * @async
-     * @desc Get's claimed amount of a github issue.
-     * @param issueId
-     * @returns {Promise<Map<string, number>>}
-     */
-    public static async getClaimedFunding(issueId): Promise<Map<string, number>> {
-        const platform = (await Web3x.getInstance()).fromAscii("GITHUB");
-        const repo: ClaimRepository = await Contracts.getInstance().getClaimRepository();
-
-        let funding: Map<string, number> = new Map();
-
-        let address = await repo.getTokenByIndex(platform, issueId, 0);
-        let amount = Utils.weiToNumber(await repo.getAmountByToken(platform, issueId, address));
-        funding.set(address, amount);
-
-        return funding;
-    }
-
-    /**
-     * @async
-     * @desc Checkes if an github issue already is claimed
-     * @param issueId
-     * @returns {Promise<boolean>}
-     */
-    public static async isClaimed(issueId): Promise<boolean> {
-        const repo: ClaimRepository = await Contracts.getInstance().getClaimRepository();
-        const platform = (await Web3x.getInstance()).fromAscii("GITHUB");
-
-        return repo.isClaimed(platform, issueId);
     }
 
     /**
@@ -172,7 +94,7 @@ export default class Github {
 
     private static getPlatformIdFromUrl(issueLink): string {
         let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues\/(\d+)$/.exec(issueLink);
-        if (matches && matches.length >= 4) {
+        if (matches && matches.length >= 4 && matches[2] && matches[3] && matches[4]) {
             return matches[2] + '|FR|' + matches[3] + '|FR|' + matches[4];
         } else {
             return null;

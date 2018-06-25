@@ -4,25 +4,32 @@
             FundRequest
 
             <span v-if="!isLoading && isExistingIssue"
-                  class="label label-color float-right" :class="`label-${request.status.toLowerCase()}`">{{request.status}}</span>
+                  class="label label-color float-right" :class="`label-${requestDetails.status.toLowerCase()}`">{{requestDetails.status}}</span>
+
+
+            <div v-if="!isLoading && !isExistingIssue">
+                <span class="label label-color label-blue">0 FND</span>
+                funded
+            </div>
         </div>
 
         <i v-if="isLoading" class="fnd-loader fnd-loader--small"></i>
 
         <div v-if="!isLoading">
-            <div v-if="isClaimed && isExistingIssue">
+            <div v-if="isExistingIssue && isClaimed">
                 <div class="mb-1">
                     <div class="clearfix">
                         <span>Claimed amount</span>
                         <span class="label label-color label-blue float-right">
-                        ~$ {{request.funds.usdFunds | toUsd}}
+                        ~$ {{requestDetails.funds.usdFunds | toUsd}}
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
                         <div>
-                            {{request.funds.fndFunds.totalAmount | toCrypto}} {{request.funds.fndFunds.tokenSymbol}}
+                            {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
+                            {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in request.funds.otherFunds">
+                        <div v-for="fund in requestDetails.funds.otherFunds">
                             {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
                         </div>
                     </div>
@@ -30,27 +37,28 @@
             </div>
 
 
-            <div v-if="!isClaimed && isExistingIssue">
+            <div v-if="isExistingIssue && !isClaimed">
                 <div class="mb-1">
                     <div class="clearfix">
                         <span>{{totalFunders}} Funder{{totalFunders > 1 ? 's' : ''}} </span>
                         <span class="label label-color label-blue float-right">
-                        ~$ {{request.funds.usdFunds | toUsd}}
+                        ~$ {{requestDetails.funds.usdFunds | toUsd}}
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
                         <div>
-                            {{request.funds.fndFunds.totalAmount | toCrypto}} {{request.funds.fndFunds.tokenSymbol}}
+                            {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
+                            {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in request.funds.otherFunds">
+                        <div v-for="fund in requestDetails.funds.otherFunds">
                             {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
                         </div>
                     </div>
                 </div>
-                <div v-if="yourAddress != null && yourFunding.length > 0" class="mb-1 clearfix">
+                <div v-if="yourAddress != null && funding.length > 0" class="mb-1 clearfix">
                     <span class="float-left">Your funding </span>
                     <div class="float-right text-right">
-                        <div v-for="fund in yourFunding">{{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}</div>
+                        <div v-for="fund in funding">{{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}</div>
                     </div>
                 </div>
                 <div v-if="yourAddress == null">
@@ -58,28 +66,19 @@
                     <a href @click="openOptions()">add your ethereum address</a>
                 </div>
             </div>
-
-            <div v-if="!isExistingIssue">
-                <div>
-                    <span class="label label-color label-blue">0 FND</span>
-                    funded
-                </div>
-
-            </div>
         </div>
     </div>
 
 </template>
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
-    import Github from "./Github";
     import Settings from "../../classes/Settings";
     import BrowserPlugin from "../../classes/BrowserPlugin";
     import RequestDetails from "../../classes/models/RequestDetails";
     import ToUsd from "../../filters/formatters/ToUsd";
     import ToCrypto from "../../filters/formatters/ToCrypto";
     import RequestFund from "../../classes/models/RequestFund";
-    import RequestFunds from "../../classes/models/RequestFunds";
+    import GithubRequest from "../../classes/platforms/GithubRequest";
 
     @Component({
         filters: {
@@ -88,13 +87,12 @@
         }
     })
     export default class GithubSidebarWidget extends Vue {
-        @Prop() issueId: string;
+        @Prop() githubRequest: GithubRequest;
         public yourAddress: string = null;
-        public fundingMap: Map<string, number>;
         public funding: RequestFund[] = [];
-        public request: RequestDetails = null;
+        public requestDetails: RequestDetails = null;
         public totalFunders: number = 0;
-        public isLoading: boolean = false;
+        public isLoading: boolean = true;
         public isClaimed: boolean = true;
         public isExistingIssue: boolean = false;
 
@@ -103,55 +101,31 @@
         }
 
         private async init() {
-            this.isClaimed = await Github.isClaimed(this.issueId);
+            this.isClaimed = await this.githubRequest.isClaimed();
 
             if (this.isClaimed) {
                 await this._initClaimedIssue();
             } else {
                 await this._initFundedIssue();
             }
+
+            this.isLoading = false;
         }
 
         private async _initClaimedIssue() {
-            let url = Github.getCurrentIssueUrl();
-            this.request = await Settings.getRequestDetails(url);
+            this.requestDetails = await this.githubRequest.getDetails();
             this.isExistingIssue = true;
-
-            /* not needed since values availabe from api
-                this.fundingMap = await Github.getClaimedFunding(this.issueId);
-                this.fundingMap.forEach((amount: number, address: string) => {
-                    let funding: RequestFund = RequestFunds.getFundsByAddress(this.request.funds, address);
-                    funding.totalAmount = amount;
-                    this.funding.push(funding);
-                });
-            */
-
-            this.isLoading = false;
         }
 
         private async _initFundedIssue() {
             this.yourAddress = await Settings.getEthAddress();
-            this.fundingMap = await Github.getYourFunding(this.issueId);
-            this.isExistingIssue = this.fundingMap.size > 0;
+            this.requestDetails = await this.githubRequest.getDetails();
 
-            if (this.isExistingIssue) {
-                let url = Github.getCurrentIssueUrl();
-                this.request = await Settings.getRequestDetails(url);
-
-                if (this.request.id == null || this.request.id <= 0) {
-                    this.isExistingIssue = false;
-                } else {
-                    this.fundingMap.forEach((amount: number, address: string) => {
-                        let funding: RequestFund = RequestFunds.getFundsByAddress(this.request.funds, address);
-                        funding.totalAmount = amount;
-                        this.funding.push(funding);
-                    });
-                    this.totalFunders = await Github.totalFunders(this.issueId);
-                }
-
+            if (this.requestDetails && this.requestDetails.id != null && this.requestDetails.id > 0) {
+                this.funding = await this.githubRequest.getYourFunding();
+                this.totalFunders = await this.githubRequest.getTotalFunders();
+                this.isExistingIssue = true;
             }
-
-            this.isLoading = false;
         }
 
         public openOptions() {

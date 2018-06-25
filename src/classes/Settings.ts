@@ -1,8 +1,6 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
-import Claimable from "./models/Claimable";
 import IssueProperties from "./models/IssueProperties";
-import RequestDetails from "./models/RequestDetails";
 
 export default class Settings {
     private static settings = null;
@@ -82,29 +80,21 @@ export default class Settings {
     }
 
     public static async getClaimUrl(githubUrl: string): Promise<string> {
-        let props = Settings.getIssueProperties(githubUrl);
+        let props = Settings.getIssuePropertiesFromUrl(githubUrl);
         let url = await Settings.getFundrequestUrl();
         return `${url}/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
     }
 
-    public static async getClaimablePropertiesUrl(githubUrl: string): Promise<string> {
-        let props = Settings.getIssueProperties(githubUrl);
+    public static async getClaimablePropertiesUrl(platformId: string): Promise<string> {
+        let props = Settings.getIssueProperties(platformId);
         let url = await Settings.getFundrequestUrl();
         return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}/claimable`;
     }
 
-    public static async getRequestDetailsUrl(githubUrl: string): Promise<string> {
-        let props = Settings.getIssueProperties(githubUrl);
+    public static async getRequestDetailsUrl(platformId: string): Promise<string> {
+        let props = Settings.getIssueProperties(platformId);
         let url = await Settings.getFundrequestUrl();
         return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
-    }
-
-    public static async getRequestDetails(githubUrl: string): Promise<RequestDetails> {
-        return Object.assign(new RequestDetails(), await Utils.getJSON(await Settings.getRequestDetailsUrl(githubUrl)));
-    }
-
-    public static async getClaimableProperties(githubUrl: string): Promise<Claimable> {
-        return Object.assign(new Claimable(), await Utils.getJSON(await Settings.getClaimablePropertiesUrl(githubUrl)));
     }
 
     public static getOptionsUrl(): string {
@@ -115,7 +105,17 @@ export default class Settings {
         return BrowserPlugin.get('network', 'prod');
     }
 
-    private static getIssueProperties(githubUrl: string): IssueProperties {
+    private static getIssueProperties(platformId: string): IssueProperties {
+        let matches = /^(.+)\|FR\|(.+)\|FR\|(\d+)$/i.exec(platformId);
+        let issueProperties = new IssueProperties();
+        issueProperties.owner = matches[1];
+        issueProperties.repo = matches[2];
+        issueProperties.issueNumber = Number.parseInt(matches[3]);
+
+        return issueProperties;
+    }
+
+    private static getIssuePropertiesFromUrl(githubUrl: string): IssueProperties {
         let matches = /^https:\/\/github\.com\/(.+)\/(.+)\/issues\/(\d+)$/i.exec(githubUrl);
         let issueProperties = new IssueProperties();
         issueProperties.owner = matches[1];
