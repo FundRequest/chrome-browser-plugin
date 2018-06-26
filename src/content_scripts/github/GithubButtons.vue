@@ -6,6 +6,9 @@
         <button v-if="!isClaimed" class="btn btn-sm btn-blue" @click="fund()">
             Fund
         </button>
+        <button v-if="isClaimed" class="btn btn-sm btn-blue" disabled="disabled">
+            Fund
+        </button>
     </span>
 </template>
 <script lang="ts">
