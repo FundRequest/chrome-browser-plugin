@@ -7,9 +7,9 @@ export default class RequestFunds {
 
     public static getFundsByAddress(funds: RequestFunds, address: string): RequestFund {
         if(funds.fndFunds.tokenAddress.toLowerCase() == address.toLowerCase()) {
-            return funds.fndFunds;
+            return {...funds.fndFunds};
         } else if(funds.otherFunds != null) {
-            return funds.otherFunds.find(fund => fund.tokenAddress.toLowerCase() == address.toLowerCase());
+            return {...funds.otherFunds.find(fund => fund.tokenAddress.toLowerCase() == address.toLowerCase())};
         }
 
         return null;
