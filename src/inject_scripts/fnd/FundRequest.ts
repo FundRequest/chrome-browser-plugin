@@ -20,6 +20,10 @@ export class FundRequest {
                         showCancelButton: true,
                         confirmButtonText: 'Back to github',
                         cancelButtonText: 'Show your requests',
+                        buttonsStyling: false,
+                        customClass: "modal-content",
+                        confirmButtonClass: 'btn btn-success mr-1',
+                        cancelButtonClass: 'btn btn-secondary ml-1'
                     }).then(result => {
                         if (result.value) {
                             sendResponse({
