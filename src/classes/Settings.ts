@@ -1,9 +1,41 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
 import IssueProperties from "./models/IssueProperties";
+import Github from "../content_scripts/github/Github";
 
 export default class Settings {
-    private static settings = null;
+    private static instance: Settings;
+    private _settings: object = null;
+
+    /**
+     * @desc Get a Github.class instance
+     * @returns {Github}
+     */
+    public static async getInstance(): Promise<Settings> {
+        if (!Settings.instance) {
+            Settings.instance = new Settings();
+            await Settings.instance.init();
+        }
+        return Settings.instance;
+    }
+
+    public async init() {
+        if (this._settings == null) {
+            let url = await Settings.getFundrequestUrl();
+
+            if (url.length > 0) {
+                try {
+                    this._settings = await Utils.getJSON(`${url}/pubenv`);
+                } catch (e) {
+                    console.log(`Something went wrong getting the settings from ${await Settings.getFundrequestUrl()}`, e);
+                }
+            }
+        }
+    }
+
+    public get settings() {
+        return this._settings;
+    }
 
     public static async getFundrequestUrl(): Promise<string> {
         let network = await Settings.getNetwork();
@@ -59,19 +91,12 @@ export default class Settings {
     }
 
     public static async getProperty(propertyName: string) {
-        if (Settings.settings == null) {
-            let url = await Settings.getFundrequestUrl();
-
-            if (url.length > 0) {
-                try {
-                    Settings.settings = await Utils.getJSON(`${await Settings.getFundrequestUrl()}/pubenv`);
-                } catch (e) {
-                    Settings.settings = "";
-                    console.log(`Something went wrong getting the settings from ${await Settings.getFundrequestUrl()}`, e);
-                }
-            }
+        let instance: Settings = await Settings.getInstance();
+        if (instance.settings && instance.settings.hasOwnProperty(propertyName)) {
+            return instance.settings[propertyName];
+        } else {
+            return null;
         }
-        return Settings.settings[propertyName];
     }
 
     public static async getFundUrl(githubUrl: string): Promise<string> {

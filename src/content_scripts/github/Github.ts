@@ -4,6 +4,7 @@ import GithubOverviewItemFunds from "./GithubOverviewItemFunds.vue";
 import VueInitializer from "../../classes/VueInitializer";
 import BrowserPlugin from "../../classes/BrowserPlugin";
 import GithubRequest from "../../classes/platforms/GithubRequest";
+import Settings from "../../classes/Settings";
 
 /**
  * @class Github
@@ -39,7 +40,8 @@ export default class Github {
         });
     }
 
-    private static init() {
+    private static async init() {
+        await Settings.getInstance(); //already init and wait for an Settings instance, else it will be called for each issue in the overview since the async call to get the api takes to long.
         Github.currentGithubRequest = null; // reset this to null will remove it available for garbage collection
         let platformId = Github.getCurrentPlatformId();
 

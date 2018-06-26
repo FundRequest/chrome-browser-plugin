@@ -1,5 +1,9 @@
 <template>
-    <span class="goi-funds" v-if="isVisible"><span class="goi-funds-icon goi-funds-icon--separator" v-html="icon"></span><span class="goi-funds-icon goi-funds-icon--fnd" v-html="iconFnd"></span> Total Funding: ~${{requestDetails.funds.usdFunds | toUsd}}</span>
+    <span class="goi-funds" v-if="isVisible">
+        <span class="goi-funds-icon goi-funds-icon--separator" v-html="icon"></span>
+        <span class="goi-funds-icon goi-funds-icon--fnd" v-html="iconFnd"></span>
+        Total Funding: ~${{requestDetails.funds.usdFunds | toUsd}}
+    </span>
 </template>
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
@@ -22,7 +26,6 @@
         public icon: string = SVGs.separator;
         public iconFnd: string = SVGs.fnd;
         public isVisible: boolean = false;
-        public isClaimed: boolean = false;
 
         mounted() {
             this.request = new GithubRequest(this.platformId);
@@ -30,10 +33,8 @@
         }
 
         private async init() {
-            this.isClaimed = await this.request.isClaimed();
-
-            if (!this.isClaimed && await this.request.existsInFundRepository()) {
-                this.requestDetails = await this.request.getDetails();
+            this.requestDetails = await this.request.getDetails();
+            if (this.requestDetails != null) {
                 this.isVisible = true;
             }
         }

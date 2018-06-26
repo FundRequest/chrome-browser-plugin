@@ -134,8 +134,12 @@ export default abstract class PlatformRequest implements PlatformRequestInterfac
      */
     public async getDetails(): Promise<RequestDetails> {
         if (!this.detailsInitialized) {
-            this.details = await this.existsInFundRepository() || await this.isClaimed() ? await RequestApi.getRequestDetails(this.getPlatformId()) : null;
             this.detailsInitialized = true;
+            try {
+                this.details = await this.existsInFundRepository() || await this.isClaimed() ? await RequestApi.getRequestDetails(this.getPlatformId()) : null;
+            } catch (e) {
+                this.details = null;
+            }
         }
         return this.details;
     }

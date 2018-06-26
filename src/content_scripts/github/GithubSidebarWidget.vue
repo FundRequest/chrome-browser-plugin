@@ -129,7 +129,6 @@
         private async _initFundedIssue() {
             this.yourAddress = await Settings.getEthAddress();
             this.requestDetails = await this.githubRequest.getDetails();
-
             if (this.requestDetails && this.requestDetails.id != null && this.requestDetails.id > 0) {
                 this.funding = await this.githubRequest.getYourFunding();
                 this.totalFunders = await this.githubRequest.getTotalFunders();
