@@ -87,8 +87,10 @@ export default abstract class PlatformRequest implements PlatformRequestInterfac
             this.fundingArray = [];
             await (await this.getYourFundingMap()).forEach(async (amount: number, address: string) => {
                 let funding: RequestFund = RequestFunds.getFundsByAddress((await this.getDetails()).funds, address);
-                funding.totalAmount = amount;
-                this.fundingArray.push(funding);
+                if (funding) {
+                    funding.totalAmount = amount;
+                    this.fundingArray.push(funding);
+                }
             });
         }
         return this.fundingArray;
