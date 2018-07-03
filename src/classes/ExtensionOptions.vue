@@ -11,11 +11,12 @@
             </small>
         </div>
         <div class="form-group">
-            <label for="network">Network</label>
+            <label for="network">Environment</label>
             <select v-model="network" id="network" class="form-control">
-                <option value="main" selected>Main net</option>
-                <option value="dev">Development (uses kovan)</option>
-                <option value="local">Local (only when running platform locally)</option>
+                <option value="prod" selected>Production (Mainnet)</option>
+                <option value="staging">Staging (Kovan)</option>
+                <option value="dev">Development (Kovan)</option>
+                <option value="local">Local (Kovan)</option>
             </select>
         </div>
         <div class="alert alert-success" v-if="status != null">{{status}}</div>
@@ -33,7 +34,7 @@
     @Component
     export default class ExtensionOptions extends Vue {
         public ethAddress: string = null;
-        public network: string = 'main';
+        public network: string = 'prod';
         public status: string = null;
         public ethAddressValid: boolean = true;
 

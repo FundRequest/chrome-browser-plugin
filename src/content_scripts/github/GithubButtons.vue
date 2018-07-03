@@ -3,25 +3,26 @@
         <button v-if="isClaimable" class="btn btn-sm btn-danger" @click="claim()">
             Claim
         </button>
-        <button class="btn btn-sm btn-blue" @click="fund()">
+        <button v-if="!isClaimed" class="btn btn-sm btn-blue" @click="fund()">
+            Fund
+        </button>
+        <button v-if="isClaimed" class="btn btn-sm btn-blue" disabled="disabled">
             Fund
         </button>
     </span>
 </template>
 <script lang="ts">
     import {Component, Prop, Vue} from "vue-property-decorator";
-    import BrowserPlugin from "../../classes/BrowserPlugin";
-    import Github, {RequestFundInfo} from "./Github";
-    import {Claimable} from "../../classes/Claimable";
-    import Settings from "../../classes/Settings";
     import iziToast from "izitoast";
+    import BrowserPlugin from "../../classes/BrowserPlugin";
+    import Github from "./Github";
+    import GithubRequest from "../../classes/platforms/GithubRequest";
 
     @Component
     export default class GithubButtons extends Vue {
-        @Prop() issueId: string;
+        @Prop() githubRequest: GithubRequest;
 
-        public requestFundInfo: RequestFundInfo = null;
-        public claimableProperties: Claimable = null;
+        public isClaimed: boolean = true;
         public isClaimable: boolean = false;
         public isClaimableByCurrentUser: boolean = false;
         public url: string = null;
@@ -32,13 +33,15 @@
         }
 
         private async init() {
-            this.username = Github.getUserLoginName();
-            this.url = Github.getCurrentIssueUrl();
-            this.claimableProperties = await Settings.getClaimableProperties(this.url);
+            this.isClaimed = await this.githubRequest.isClaimed();
+            if (!this.isClaimed) {
+                this.username = Github.getUserLoginName();
+                this.url = Github.getCurrentIssueUrl();
 
-            if (this.claimableProperties) {
-                this.isClaimable = this.claimableProperties.claimable;
-                this.isClaimableByCurrentUser = this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase();
+                this.isClaimable = await this.githubRequest.isClaimable();
+                if (this.isClaimable) {
+                    this.isClaimableByCurrentUser = (await this.githubRequest.getPlatformUserThatCanClaim()).toLowerCase() == Github.getUserLoginName().toLowerCase();
+                }
             }
         }
 
@@ -47,7 +50,7 @@
         }
 
         public async claim() {
-            if(this.claimableProperties.claimableByPlatformUser.toLowerCase() == Github.getUserLoginName().toLowerCase()) {
+            if (this.isClaimableByCurrentUser) {
                 BrowserPlugin.claim(this.url);
             } else {
                 iziToast.warning({

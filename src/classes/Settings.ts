@@ -1,17 +1,51 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
-import {Claimable} from "./Claimable";
-import {IssueProperties} from "./IssueProperties";
+import IssueProperties from "./models/IssueProperties";
+import Github from "../content_scripts/github/Github";
 
 export default class Settings {
-    private static settings = null;
+    private static instance: Settings;
+    private _settings: object = null;
+
+    /**
+     * @desc Get a Github.class instance
+     * @returns {Github}
+     */
+    public static async getInstance(): Promise<Settings> {
+        if (!Settings.instance) {
+            Settings.instance = new Settings();
+            await Settings.instance.init();
+        }
+        return Settings.instance;
+    }
+
+    public async init() {
+        if (this._settings == null) {
+            let url = await Settings.getFundrequestUrl();
+
+            if (url.length > 0) {
+                try {
+                    this._settings = await Utils.getJSON(`${url}/pubenv`);
+                } catch (e) {
+                    console.log(`Something went wrong getting the settings from ${await Settings.getFundrequestUrl()}`, e);
+                }
+            }
+        }
+    }
+
+    public get settings() {
+        return this._settings;
+    }
 
     public static async getFundrequestUrl(): Promise<string> {
         let network = await Settings.getNetwork();
         let url = "";
         switch (network) {
-            case 'main':
+            case 'prod':
                 url = Settings.mainUrl;
+                break;
+            case 'staging':
+                url = Settings.stagingUrl;
                 break;
             case 'dev':
                 url = Settings.devUrl;
@@ -27,12 +61,11 @@ export default class Settings {
         let network = await Settings.getNetwork();
         let url = "";
         switch (network) {
-            case 'main':
+            case 'prod':
                 url = `https://etherscan.io/tx/${transactionId}`;
                 break;
+            case 'staging':
             case 'dev':
-                url = `https://kovan.etherscan.io/tx/${transactionId}`;
-                break;
             case 'local':
                 url = `https://kovan.etherscan.io/tx/${transactionId}`;
                 break;
@@ -58,19 +91,12 @@ export default class Settings {
     }
 
     public static async getProperty(propertyName: string) {
-        if (Settings.settings == null) {
-            let url = await Settings.getFundrequestUrl();
-
-            if (url.length > 0) {
-                try {
-                    Settings.settings = await Utils.getJSON(`${await Settings.getFundrequestUrl()}/pubenv`);
-                } catch (e) {
-                    Settings.settings = "";
-                    console.log(`Something went wrong getting the settings from ${await Settings.getFundrequestUrl()}`, e);
-                }
-            }
+        let instance: Settings = await Settings.getInstance();
+        if (instance.settings && instance.settings.hasOwnProperty(propertyName)) {
+            return instance.settings[propertyName];
+        } else {
+            return null;
         }
-        return Settings.settings[propertyName];
     }
 
     public static async getFundUrl(githubUrl: string): Promise<string> {
@@ -79,19 +105,21 @@ export default class Settings {
     }
 
     public static async getClaimUrl(githubUrl: string): Promise<string> {
-        let props = Settings.getIssueProperties(githubUrl);
+        let props = Settings.getIssuePropertiesFromUrl(githubUrl);
         let url = await Settings.getFundrequestUrl();
         return `${url}/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
     }
 
-    public static async getClaimablePropertiesUrl(githubUrl: string): Promise<string> {
-        let props = Settings.getIssueProperties(githubUrl);
+    public static async getClaimablePropertiesUrl(platformId: string): Promise<string> {
+        let props = Settings.getIssueProperties(platformId);
         let url = await Settings.getFundrequestUrl();
         return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}/claimable`;
     }
 
-    public static async getClaimableProperties(githubUrl: string): Promise<Claimable> {
-        return await Utils.getJSON(await Settings.getClaimablePropertiesUrl(githubUrl));
+    public static async getRequestDetailsUrl(platformId: string): Promise<string> {
+        let props = Settings.getIssueProperties(platformId);
+        let url = await Settings.getFundrequestUrl();
+        return `${url}/rest/requests/github/${props.owner}/${props.repo}/${props.issueNumber}`;
     }
 
     public static getOptionsUrl(): string {
@@ -99,10 +127,20 @@ export default class Settings {
     }
 
     public static async getNetwork(): Promise<string> {
-        return BrowserPlugin.get('network', 'main');
+        return BrowserPlugin.get('network', 'prod');
     }
 
-    private static getIssueProperties(githubUrl: string): IssueProperties {
+    private static getIssueProperties(platformId: string): IssueProperties {
+        let matches = /^(.+)\|FR\|(.+)\|FR\|(\d+)$/i.exec(platformId);
+        let issueProperties = new IssueProperties();
+        issueProperties.owner = matches[1];
+        issueProperties.repo = matches[2];
+        issueProperties.issueNumber = Number.parseInt(matches[3]);
+
+        return issueProperties;
+    }
+
+    private static getIssuePropertiesFromUrl(githubUrl: string): IssueProperties {
         let matches = /^https:\/\/github\.com\/(.+)\/(.+)\/issues\/(\d+)$/i.exec(githubUrl);
         let issueProperties = new IssueProperties();
         issueProperties.owner = matches[1];
@@ -118,6 +156,10 @@ export default class Settings {
 
     private static get devUrl() {
         return 'https://dev-web.fundrequest.io';
+    }
+
+    private static get stagingUrl() {
+        return 'https://staging.fundrequest.io';
     }
 
     private static get localUrl() {

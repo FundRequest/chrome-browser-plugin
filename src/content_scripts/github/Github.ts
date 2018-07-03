@@ -3,21 +3,21 @@ import GithubSidebarWidget from "./GithubSidebarWidget.vue";
 import GithubOverviewItemFunds from "./GithubOverviewItemFunds.vue";
 import VueInitializer from "../../classes/VueInitializer";
 import BrowserPlugin from "../../classes/BrowserPlugin";
-import Contracts from "../../classes/Contracts";
-import {Web3x} from "../../classes/Web3x";
+import GithubRequest from "../../classes/platforms/GithubRequest";
 import Settings from "../../classes/Settings";
-import BigNumber from 'bignumber.js';
-import Utils from "../../classes/Utils";
 
-export interface RequestFundInfo {
-    totalFunders: string;
-    totalFunding: string;
-    yourFunding: string;
-}
-
+/**
+ * @class Github
+ * @desc Initializes fundrequest functionality in github. Also reinits everything when github does a soft refresh.
+ */
 export default class Github {
     private static instance: Github;
+    private static currentGithubRequest: GithubRequest = null;
 
+    /**
+     * @desc Get a Github.class instance
+     * @returns {Github}
+     */
     public static getInstance(): Github {
         if (!Github.instance) {
             Github.instance = new Github();
@@ -40,53 +40,47 @@ export default class Github {
         });
     }
 
-    private static init() {
-        let props = [];
-        props['issueId'] = Github.getCurrentPlatformId();
+    private static async init() {
+        await Settings.getInstance(); //already init and wait for an Settings instance, else it will be called for each issue in the overview since the async call to get the api takes to long.
+        Github.currentGithubRequest = null; // reset this to null will remove it available for garbage collection
+        let platformId = Github.getCurrentPlatformId();
 
-        if(props['issueId'] != null) {
+        if (platformId != null) {
+            Github.currentGithubRequest = new GithubRequest(platformId);
+            let props = [];
+            props['githubRequest'] = Github.currentGithubRequest;
             VueInitializer.createComponent(document.querySelector('#partial-discussion-sidebar'), 'fnd-sidebar-issue-funds discussion-sidebar-item discussion-sidebar-item--fnd', GithubSidebarWidget, props);
             VueInitializer.createComponent(document.querySelector('#partial-discussion-header .gh-header-actions'), 'fnd-action-buttons', GithubButtons, props);
         }
 
-        if(Github.containsCurrentPageIssues()) {
+        if (Github.containsCurrentPageIssues()) {
             let issues = document.querySelectorAll('.issues-listing ul.js-navigation-container.js-active-navigation-container [data-id]');
             if (issues.length > 0) {
                 for (let i = 0; i < issues.length; i++) {
+                    let currentProps = [];
                     let href = (<HTMLAnchorElement>issues[i].querySelector('.js-navigation-open')).href;
                     let meta: HTMLElement = issues[i].querySelector('.issue-meta-section');
-                    props['issueId'] = Github.getPlatformIdFromUrl(href);
-                    VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, props);
+                    currentProps['platformId'] = Github.getPlatformIdFromUrl(href);
+                    VueInitializer.createComponent(meta, 'fnd-meta-issue-funds', GithubOverviewItemFunds, currentProps);
                 }
             }
         }
     }
 
-    public static async getRequestFundInfo(issueId): Promise<RequestFundInfo> {
-        let account =  await Settings.getEthAddress();
-        let tokenAddress =  await Settings.getTokenContractAddress();
-        let platform = (await Web3x.getInstance()).fromAscii("GITHUB");
-
-        let result: [BigNumber, BigNumber, BigNumber] = await (await Contracts.getInstance().getFundRepository()).getFundInfo(
-            platform,
-            String(issueId),
-            account || '',
-            tokenAddress
-        );
-
-        return {
-            totalFunders: result[0].toString(),
-            totalFunding: Utils.weiToString(result[1]),
-            yourFunding: Utils.weiToString(result[2])
-        } as RequestFundInfo;
-    }
-
+    /**
+     * @desc Get's the current github user name (from github page meta data)
+     * @returns {string}
+     */
     public static getUserLoginName(): string {
         let userNameMeta = document.head.querySelector("[name=\"user-login\"]");
         return userNameMeta ? userNameMeta.getAttribute("content") : "";
     }
 
-    public static getCurrentIssueUrl() {
+    /**
+     * @desc Get's the current github url
+     * @returns {string}
+     */
+    public static getCurrentIssueUrl(): string {
         let header: HTMLElement = (<HTMLElement>document.querySelector('#partial-discussion-header'));
         if (header) {
             let url = `https://github.com${header.dataset.url}`;
@@ -96,20 +90,20 @@ export default class Github {
         }
     }
 
-    private static getCurrentPlatformId() {
+    private static getCurrentPlatformId(): string {
         return this.getPlatformIdFromUrl(Github.getCurrentIssueUrl());
     }
 
-    private static getPlatformIdFromUrl(issueLink) {
+    private static getPlatformIdFromUrl(issueLink): string {
         let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues\/(\d+)$/.exec(issueLink);
-        if (matches && matches.length >= 4) {
+        if (matches && matches.length >= 4 && matches[2] && matches[3] && matches[4]) {
             return matches[2] + '|FR|' + matches[3] + '|FR|' + matches[4];
         } else {
             return null;
         }
     }
 
-    private static containsCurrentPageIssues() {
+    private static containsCurrentPageIssues(): boolean {
         let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues/i.exec(location.href);
         return matches && matches.length >= 3;
     }
