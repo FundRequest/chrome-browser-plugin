@@ -1,6 +1,6 @@
 {
   "name": "FundRequest",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "manifest_version": 2,
   "description": "Extension to fund github issues using the FundRequest platform.",
   "homepage_url": "https://fundrequest.io/",
