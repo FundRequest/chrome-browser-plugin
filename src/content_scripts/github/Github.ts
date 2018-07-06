@@ -193,7 +193,10 @@ export default class Github {
     }
 
     private static containsCurrentPageIssues(): boolean {
-        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues/i.exec(location.href);
+        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/issues/i.exec(location.href)
+            || /^(https:\/\/github\.com)?\/(.+)\/(.+)\/labels\/.*/i.exec(location.href)
+            || /^(https:\/\/github\.com)?\/(.+)\/(.+)\/milestone\/.*/i.exec(location.href);
+
         return matches && matches.length >= 3;
     }
 }
