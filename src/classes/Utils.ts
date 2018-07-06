@@ -22,25 +22,31 @@ export default class Utils {
     }
 
     public static getJSON(url: string): Promise<any> {
-        return $.getJSON(url).promise();
+        return new Promise((resolve, reject) => {
+            $.getJSON(url).done(res => resolve(res)).fail(reject);
+        });
     }
 
     public static postJSON(url: string, body: any): Promise<any> {
-        return $.ajax({
-            type: 'POST',
-            url: url,
-            data: JSON.stringify(body),
-            contentType: 'application/json',
-            dataType: 'json'
-        }).promise();
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: JSON.stringify(body),
+                contentType: 'application/json',
+                dataType: 'json'
+            }).done(res => resolve(res)).fail(reject);
+        });
     }
 
     public static post(url: string, body: any = null): Promise<any> {
-        if (body == null) {
-            return $.post(url).promise();
-        } else {
-            return $.post(url, body).promise();
-        }
+        return new Promise((resolve, reject) => {
+            if (body == null) {
+                return $.post(url).done(res => resolve(res)).fail(reject);
+            } else {
+                return $.post(url, body).done(res => resolve(res)).fail(reject);
+            }
+        });
     }
 
     public static weiToString(amountInWei: any): string {
