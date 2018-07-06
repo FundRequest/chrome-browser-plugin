@@ -151,6 +151,12 @@ export default class Github {
         let currentProps = [];
         let href = (<HTMLAnchorElement>issue.querySelector('.js-navigation-open')).href;
         currentProps['platformId'] = Github.getPlatformIdFromUrl(href);
+        if (!document.querySelector(`.issues-listing #${issue.id} .issue-meta-section`)) {
+            // no container found create it first
+            VueInitializer.createComponent(
+                `li#${issue.id} .mt-1.text-small.text-gray`,
+                'issue-meta-section css-truncate issue-milestone ml-2', GithubOverviewItemFunds, [], true);
+        }
         return VueInitializer.createComponent(
             `.issues-listing #${issue.id} .issue-meta-section`,
             'fnd-meta-issue-funds', GithubOverviewItemFunds, currentProps);

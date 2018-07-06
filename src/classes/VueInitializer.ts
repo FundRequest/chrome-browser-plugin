@@ -3,8 +3,8 @@ import Utils from './Utils';
 
 export default class VueInitializer {
 
-    public static createComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null) {
-        return VueInitializer._initComponent(containerQuerySelector, classAttr, ComponentClass, props);
+    public static createComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null, createAfter?: boolean) {
+        return VueInitializer._initComponent(containerQuerySelector, classAttr, ComponentClass, props, createAfter);
     }
 
     public static reinitComponent(vueComponent: Vue) {
@@ -15,7 +15,7 @@ export default class VueInitializer {
         }
     }
 
-    private static _initComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null): Vue {
+    private static _initComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null, createAfter?: boolean): Vue {
         let id = `fndComp_${Utils.generateUUID()}`;
         let container = document.querySelector(containerQuerySelector);
         if (container) {
@@ -24,7 +24,8 @@ export default class VueInitializer {
             newElement.setAttribute('id', id);
             newElement.setAttribute('class', classAttr);
             newElement.setAttribute('data-fnd-parent', containerQuerySelector);
-            container.insertBefore(newElement, firstChild);
+            if (!createAfter) container.insertBefore(newElement, firstChild);
+            else container.appendChild(newElement);
 
             return new Vue({
                 el: `#${id}`,
