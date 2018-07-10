@@ -151,15 +151,10 @@ export default class Github {
         let currentProps = [];
         let href = (<HTMLAnchorElement>issue.querySelector('.js-navigation-open')).href;
         currentProps['platformId'] = Github.getPlatformIdFromUrl(href);
-        if (!document.querySelector(`.issues-listing #${issue.id} .issue-meta-section`)) {
-            // no container found create it first
-            VueInitializer.createComponent(
-                `li#${issue.id} .mt-1.text-small.text-gray`,
-                'issue-meta-section css-truncate issue-milestone ml-2', GithubOverviewItemFunds, [], true);
-        }
+
         return VueInitializer.createComponent(
-            `.issues-listing #${issue.id} .issue-meta-section`,
-            'fnd-meta-issue-funds', GithubOverviewItemFunds, currentProps);
+            `li#${issue.id} .mt-1.text-small.text-gray`,
+            'fnd-meta-issue-funds', GithubOverviewItemFunds, currentProps, true);
     }
 
     /**
@@ -199,8 +194,8 @@ export default class Github {
     }
 
     private static containsCurrentPageIssues(): boolean {
-        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/(issues|labels|milestone)(\/.*)?/i.exec(location.href);
-        return matches && matches.length >= 3;
+        let matches = /^(https:\/\/github\.com)?\/(.+)\/(.+)\/(issues|labels|milestone)/i.exec(location.href);
+        return matches && matches.length >= 4;
     }
 }
 
