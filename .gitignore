@@ -2,3 +2,4 @@
 
 node_modules/*
 dist/js/*
+**/chrome-browser-plugin.iml
