@@ -25,11 +25,11 @@
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
-                        <div>
+                        <div v-if="requestDetails.funds.fndFunds">
                             {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
                             {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in requestDetails.funds.otherFunds">
+                        <div v-for="fund in otherFunds">
                             {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
                         </div>
                     </div>
@@ -46,11 +46,11 @@
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
-                        <div>
+                        <div v-if="requestDetails.funds.fndFunds">
                             {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
                             {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in requestDetails.funds.otherFunds">
+                        <div v-for="fund in otherFunds">
                             {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
                         </div>
                     </div>
@@ -107,6 +107,14 @@
 
         public openOptions() {
             BrowserPlugin.openOptions();
+        }
+
+        public get otherFunds() {
+            if(Array.isArray(this.requestDetails.funds.otherFunds)) {
+                return this.requestDetails.funds.otherFunds;
+            } else {
+                return [this.requestDetails.funds.otherFunds];
+            }
         }
 
         private async init() {
