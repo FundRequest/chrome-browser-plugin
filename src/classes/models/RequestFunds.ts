@@ -9,11 +9,7 @@ export default class RequestFunds {
         if(funds.fndFunds && funds.fndFunds.tokenAddress.toLowerCase() == address.toLowerCase()) {
             return {...funds.fndFunds};
         } else if(funds.otherFunds) {
-            if(!Array.isArray(funds.otherFunds)) {
-                return {...funds.otherFunds}
-            } else {
-                return {...(<RequestFund[]>funds.otherFunds).find(fund => fund.tokenAddress.toLowerCase() == address.toLowerCase())};
-            }
+            return {...funds.otherFunds}
         }
 
         return null;
