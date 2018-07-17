@@ -25,12 +25,13 @@
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
-                        <div>
+                        <div v-if="requestDetails.funds.fndFunds">
                             {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
                             {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in requestDetails.funds.otherFunds">
-                            {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
+                        <div v-if="requestDetails.funds.otherFunds">
+                          {{requestDetails.funds.otherFunds.totalAmount | toCrypto}}
+                          {{requestDetails.funds.otherFunds.tokenSymbol}}
                         </div>
                     </div>
                 </div>
@@ -46,12 +47,13 @@
                     </span>
                     </div>
                     <div class="text-light pl-2 text-right">
-                        <div>
+                        <div v-if="requestDetails.funds.fndFunds">
                             {{requestDetails.funds.fndFunds.totalAmount | toCrypto}}
                             {{requestDetails.funds.fndFunds.tokenSymbol}}
                         </div>
-                        <div v-for="fund in requestDetails.funds.otherFunds">
-                            {{fund.totalAmount | toCrypto}} {{fund.tokenSymbol}}
+                        <div v-if="requestDetails.funds.otherFunds">
+                          {{requestDetails.funds.otherFunds.totalAmount | toCrypto}}
+                          {{requestDetails.funds.otherFunds.tokenSymbol}}
                         </div>
                     </div>
                 </div>

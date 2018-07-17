@@ -42,7 +42,6 @@
 </script>
 <style lang="scss" scoped>
     .goi-funds {
-        margin-left: -10px;
         margin-right: 10px;
     }
 

@@ -163,7 +163,8 @@ export default abstract class PlatformRequest implements PlatformRequestInterfac
      * @returns {Promise<boolean>}
      */
     public async isClaimable(): Promise<boolean> {
-        return (await this.getClaimableProperties()).claimable;
+        let properties = await this.getClaimableProperties();
+        return properties ? properties.claimable : false;
     }
 
     /**

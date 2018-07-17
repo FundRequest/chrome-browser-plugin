@@ -3,25 +3,29 @@ import Utils from './Utils';
 
 export default class VueInitializer {
 
-    public static createComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null) {
-        let vueInstance = VueInitializer._initComponent(containerElement, classAttr, ComponentClass, props);
-
-        document.addEventListener('pjax:complete', () => {
-            if (vueInstance) {
-                vueInstance.$destroy();
-            }
-        });
+    public static createComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null, createAfter?: boolean) {
+        return VueInitializer._initComponent(containerQuerySelector, classAttr, ComponentClass, props, createAfter);
     }
 
-    private static _initComponent(containerElement: HTMLElement, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null): Vue {
-        let id = `a${Utils.generateUUID()}`;
+    public static reinitComponent(vueComponent: Vue) {
+        if (document.getElementById(vueComponent.$el.id) == null) {
+            let container = document.querySelector(vueComponent.$el.dataset.fndParent);
+            let firstChild = container.firstChild;
+            container.insertBefore(vueComponent.$el, firstChild);
+        }
+    }
 
-        if (containerElement) {
-            let firstChild = containerElement.firstChild;
+    private static _initComponent(containerQuerySelector: string, classAttr: string, ComponentClass: VueConstructor, props: Array<any> = null, createAfter?: boolean): Vue {
+        let id = `fndComp_${Utils.generateUUID()}`;
+        let container = document.querySelector(containerQuerySelector);
+        if (container) {
+            let firstChild = container.firstChild;
             let newElement = document.createElement('span') as HTMLDivElement;
             newElement.setAttribute('id', id);
             newElement.setAttribute('class', classAttr);
-            containerElement.insertBefore(newElement, firstChild);
+            newElement.setAttribute('data-fnd-parent', containerQuerySelector);
+            if (!createAfter) container.insertBefore(newElement, firstChild);
+            else container.appendChild(newElement);
 
             return new Vue({
                 el: `#${id}`,

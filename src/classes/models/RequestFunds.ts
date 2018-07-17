@@ -2,14 +2,14 @@ import RequestFund from "./RequestFund";
 
 export default class RequestFunds {
     fndFunds: RequestFund;
-    otherFunds: RequestFund[];
+    otherFunds: RequestFund;
     usdFunds: number;
 
-    public static getFundsByAddress(funds: RequestFunds, address: string): RequestFund {
-        if(funds.fndFunds.tokenAddress.toLowerCase() == address.toLowerCase()) {
+    public static getFundsByAddress(funds: RequestFunds, address: string): RequestFund | null {
+        if(funds.fndFunds && funds.fndFunds.tokenAddress.toLowerCase() == address.toLowerCase()) {
             return {...funds.fndFunds};
-        } else if(funds.otherFunds != null) {
-            return {...funds.otherFunds.find(fund => fund.tokenAddress.toLowerCase() == address.toLowerCase())};
+        } else if(funds.otherFunds) {
+            return {...funds.otherFunds}
         }
 
         return null;

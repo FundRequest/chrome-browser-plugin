@@ -1,39 +1,25 @@
 import BrowserPlugin from "./BrowserPlugin";
 import Utils from "./Utils";
 import IssueProperties from "./models/IssueProperties";
-import Github from "../content_scripts/github/Github";
 
 export default class Settings {
-    private static instance: Settings;
-    private _settings: object = null;
+    private static _settings: object = null;
 
-    /**
-     * @desc Get a Github.class instance
-     * @returns {Github}
-     */
-    public static async getInstance(): Promise<Settings> {
-        if (!Settings.instance) {
-            Settings.instance = new Settings();
-            await Settings.instance.init();
-        }
-        return Settings.instance;
-    }
-
-    public async init() {
+    public static async getSettings() {
         if (this._settings == null) {
+            this._settings = { loaded: false };
             let url = await Settings.getFundrequestUrl();
 
             if (url.length > 0) {
                 try {
                     this._settings = await Utils.getJSON(`${url}/pubenv`);
+                    this._settings['loaded'] = true;
                 } catch (e) {
                     console.log(`Something went wrong getting the settings from ${await Settings.getFundrequestUrl()}`, e);
                 }
             }
         }
-    }
 
-    public get settings() {
         return this._settings;
     }
 
@@ -91,9 +77,9 @@ export default class Settings {
     }
 
     public static async getProperty(propertyName: string) {
-        let instance: Settings = await Settings.getInstance();
-        if (instance.settings && instance.settings.hasOwnProperty(propertyName)) {
-            return instance.settings[propertyName];
+        let settings = await Settings.getSettings();
+        if (settings && settings.hasOwnProperty(propertyName)) {
+            return settings[propertyName];
         } else {
             return null;
         }
