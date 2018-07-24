@@ -103,7 +103,8 @@ export default abstract class PlatformRequest implements PlatformRequestInterfac
      */
     public async getYourFundingMap(): Promise<Map<string, number>> {
         if (!this.fundingMap) {
-            this.fundingMap = await RequestUtils.getRequestFundingDetailsForFunder(this.getPlatformName(), this.getPlatformId(), await Settings.getEthAddress());
+            let address = await Settings.getEthAddress();
+            this.fundingMap = address ? await RequestUtils.getRequestFundingDetailsForFunder(this.getPlatformName(), this.getPlatformId(), address) : new Map();
         }
         return this.fundingMap;
     }
@@ -126,7 +127,7 @@ export default abstract class PlatformRequest implements PlatformRequestInterfac
      * @returns {Promise<Map<string, number>>}
      */
     public async existsInFundRepository(): Promise<boolean> {
-        return (await this.getYourFundingMap()).size > 0;
+        return (await this.getTotalFunders() > 0);
     }
 
     /**
