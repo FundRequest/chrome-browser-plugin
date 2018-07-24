@@ -33,8 +33,8 @@ export default class Settings {
             case 'staging':
                 url = Settings.stagingUrl;
                 break;
-            case 'dev':
-                url = Settings.devUrl;
+            case 'tst1':
+                url = Settings.tst1Url;
                 break;
             case 'local':
                 url = Settings.localUrl;
@@ -51,7 +51,7 @@ export default class Settings {
                 url = `https://etherscan.io/tx/${transactionId}`;
                 break;
             case 'staging':
-            case 'dev':
+            case 'tst1':
             case 'local':
                 url = `https://kovan.etherscan.io/tx/${transactionId}`;
                 break;
@@ -140,8 +140,8 @@ export default class Settings {
         return 'https://fundrequest.io';
     }
 
-    private static get devUrl() {
-        return 'https://dev-web.fundrequest.io';
+    private static get tst1Url() {
+        return 'https://tst1.fundrequest.io';
     }
 
     private static get stagingUrl() {

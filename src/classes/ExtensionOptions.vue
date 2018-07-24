@@ -15,7 +15,7 @@
             <select v-model="network" id="network" class="form-control">
                 <option value="prod" selected>Production (Mainnet)</option>
                 <option value="staging">Staging (Kovan)</option>
-                <option value="dev">Development (Kovan)</option>
+                <option value="tst1">Test (Kovan)</option>
                 <option value="local">Local (Kovan)</option>
             </select>
         </div>
