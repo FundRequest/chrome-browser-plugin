@@ -36,6 +36,9 @@ export default class Settings {
             case 'tst1':
                 url = Settings.tst1Url;
                 break;
+            case 'tst2':
+                url = Settings.tst2Url;
+                break;
             case 'local':
                 url = Settings.localUrl;
                 break;
@@ -142,6 +145,10 @@ export default class Settings {
 
     private static get tst1Url() {
         return 'https://tst1.fundrequest.io';
+    }
+
+    private static get tst2Url() {
+        return 'https://tst2.fundrequest.io';
     }
 
     private static get stagingUrl() {
